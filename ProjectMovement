@@ -1,0 +1,28 @@
+from mindstorms.control import wait_for_seconds
+import hub
+
+Class Movimento:
+
+def __init__(self,kp,ki,kd,vel):
+	self.kp = kp
+	self.ki = ki
+	self.kd = kd
+	self.vel = vel
+
+def dist (dist):
+	bateria = hub.battery.capacity_left()
+	dist = dist + (((100-bateria)/100)*x)##X= número a ser definido com base na variação de distância entre dois pontos da bateria separados por 10% (ex.:100 e 90)
+	wait_for_seconds(.01)
+
+def andar(self,dist,ref):
+	dist(dist)
+	vel = self.vel
+	##resto do andar com PID
+
+def curva(self,ang,power):
+	##curva com PID
+
+def dist (dist):
+	bateria = hub.battery.capacity_left()
+	dist = dist + (((100-bateria)/100)*x)##X= número a ser definido com base na variação de distância entre dois pontos da bateria separados por 10% (ex.:100 e 90)
+	wait_for_seconds(.01)
