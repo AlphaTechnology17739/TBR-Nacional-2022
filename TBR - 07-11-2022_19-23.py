@@ -9,9 +9,11 @@ scanE = ColorSensor('E')
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def Curva(refer,power):
+def Curva(refer,power):  #
+    #Função cujo o objetivo é fazer uma curva com cálculo PID  em torno do eixo da roda que estará inerte, a partir de uma referência (medida em graus) .
+    #No caso do operador decidir colocar mais ou menos potência no motor que executará o giro, a alteração poderá ser feita no segundo 
     timer = Timer()
-    timer.reset()
+    timer.reset() #reseta timer
     hub.motion_sensor.reset_yaw_angle() # Reseta o angulo do giroscópio
     lastError = 0
     ref = refer
@@ -24,7 +26,7 @@ def Curva(refer,power):
         ki = -0.00000022
     while True:
         angle = hub.motion_sensor.get_yaw_angle() # atribui o angulo lido a uma variável
-        error = ref - angle
+        error = ref - angle #atrib
         P = kp * error
         soma += error
         I = Ki * soma
