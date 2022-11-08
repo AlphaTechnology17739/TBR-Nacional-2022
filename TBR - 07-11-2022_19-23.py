@@ -324,3 +324,18 @@ def DefensivoD():
     Andar(-4,0)
     Curva(50,0)
     Andar(-3.5,0)
+#------------------------------------------------------------------------------------------------------------------------------------
+def MudasPequenas ():
+    Andar(3.6,0)
+    Curva(-50,0)
+    Andar(4,0)
+    Andar(-8.5,-2)
+    wait_for_seconds(.15)
+    Andar(3.27,0)
+    Curva(90,0)
+    Andar(3.3,0)
+    Andar(-8,0)
+    Andar(.5,0)
+    wait_for_seconds(.15)
+    Curva(80,0)
+    Andar(2.3,0)
