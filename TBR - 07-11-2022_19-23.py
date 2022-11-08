@@ -12,39 +12,40 @@ scanE = ColorSensor('E')
 def Curva(refer,power):  #
     #Função cujo o objetivo é fazer uma curva com cálculo PID  em torno do eixo da roda que estará inerte, a partir de uma referência (medida em graus) .
     #No caso do operador decidir colocar mais ou menos potência no motor que executará o giro, a alteração poderá ser feita no segundo 
+    
     timer = Timer()
     timer.reset() #reseta timer
     hub.motion_sensor.reset_yaw_angle() # Reseta o angulo do giroscópio
     lastError = 0
-    ref = refer
+    ref = refer 
     tpCur = ((abs(ref)*140)/9000)
-    kp = 2.3
-    kd = .66
+    kp = 2.3 #Define o valor do coeficiente de proporcional
+    kd = .66 #Define o valor do coeficiente de derivativa
     if ref>0:
-        ki = 0.00000022
+        ki = 0.00000022 #Define o valor do coeficiente de integral
     else:
-        ki = -0.00000022
+        ki = -0.00000022 #Define o valor do coeficiente de integral
     while True:
         angle = hub.motion_sensor.get_yaw_angle() # atribui o angulo lido a uma variável
-        error = ref - angle #atrib
-        P = kp * error
+        error = ref - angle #atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
+        P = kp * error # Realiza o cálculo de Proporcional
         soma += error
-        I = Ki * soma
-        D = (error-lastError)*kd
+        I = Ki * soma # Realiza o cálculo de Integral
+        D = (error-lastError)*kd # Realiza o cálculo de Derivativa
         PID = P + I + D
         lastError = error
 
         if (ref>0):
-            motor_pair.start_tank_at_power(PID+power, 0)
+            motor_pair.start_tank_at_power(PID+power, 0) # inicia o movimento com potência de PID no motor da esquerda
         else:
-            motor_pair.start_tank_at_power(0, PID+power)
-        if(abs(error)<1 or tpCur<timer.now()):
-            break
-    motor_pair.stop()
+            motor_pair.start_tank_at_power(0, PID+power) # inicia o movimento com potência de PID
+        if(abs(error)<1 or tpCur<timer.now()): #Se o erro for menor que 1 ou o temporizador for maior que o tempo mínimo para realizar a curva...
+            break # o robô sai do loop
+    motor_pair.stop() # e para de mover
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def Breaking():
+def Breaking(): #Não deixa o robô sair da programa
     br=True
     while br:
         if (hub.left_button.is.pressed() or hub.right_button.is.pressed()):
