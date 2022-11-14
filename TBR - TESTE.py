@@ -20,7 +20,7 @@ scanE = ColorSensor('E')
 def Curva(refer,power):
     if (hube.left_button.is_pressed()): # Verifica se o usuário não pretende sair do programa
         controle=0
-    
+
     timer = Timer()
     timer.reset() #reseta timer
     hube.motion_sensor.reset_yaw_angle() # Reseta o angulo do giroscópio
@@ -35,9 +35,9 @@ def Curva(refer,power):
     else:
         ki = -0.00000022 # Define o valor do coeficiente de integral
     while True:
-        if(abs(error)<1 or tpCur<timer.now()   or controle==0): # Se o erro for menor que 1 <ou> o temporizador for maior que o tempo mínimo para realizar a curva <ou> a váriavel de controle for igual a 0...
+        if(abs(error)<1 or tpCur<timer.now()or controle==0): # Se o erro for menor que 1 <ou> o temporizador for maior que o tempo mínimo para realizar a curva <ou> a váriavel de controle for igual a 0...
             break # O robô sai do loop
-        if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
+        if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
             controle=0
         angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
         error = ref - angle # Atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
@@ -62,9 +62,9 @@ def Curva(refer,power):
 
 def Andar(condicao,ref):
 
-    if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
+    if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
         controle=0
-    
+
     motorB = Motor('B')
     motorF = Motor('F')
     motorB.set_degrees_counted(0)
@@ -82,7 +82,7 @@ def Andar(condicao,ref):
     while True:
         if(((abs(condicao)*100)<((abs(motorB.get_degrees_counted()))+abs(motorF.get_degrees_counted()))/4)    or controle==0):
             break
-        if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
+        if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
             controle=0
         angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
         error = ref - angle
@@ -115,12 +115,12 @@ def Andar(condicao,ref):
 
 # ==== Criação de parada temporária até que algum evento aconteça ====
 
-def Breaking(): 
-    if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
+def Breaking():
+    if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
         controle=0
     if (controle ==1):
         motor_pair.stop()
-        if (hube.left_button.is_pressed()): 
+        if (hube.left_button.is_pressed()):
             controle=0
         hube.right_button.wait_until_pressed() # Espera o botão ser apertado para sair da programação
 
@@ -129,7 +129,7 @@ def Breaking():
 # ==== Funções da primeira rota ====
 
 # ---- primeira parte ----
-# Função com o objetivo de realizar a primeira rota do tapete, onde o robô leva os defensivos 
+# Função com o objetivo de realizar a primeira rota do tapete, onde o robô leva os defensivos
 # até as áreas de plantio vermelha e verde e para o depósito a esquerda do tapete.
 def DefensivoE():
 
@@ -152,10 +152,10 @@ def DefensivoE():
     Curva(-50,0)
     Andar(-3.9,0)
 
-# ----------------------------------------------------------------------------------------------------------    
-    
+# ----------------------------------------------------------------------------------------------------------
+
 # ---- segunda parte ----
-# Função com o objetivo de realizar a segunda rota do tapete, onde o robô leva os defensivos 
+# Função com o objetivo de realizar a segunda rota do tapete, onde o robô leva os defensivos
 # até as áreas de plantio amarela, verde e para o depósito a direita e para a base.
 
 def DefensivoD():
@@ -178,7 +178,7 @@ def DefensivoD():
     Andar(-4,0)
     Curva(50,0)
     Andar(-3.5,0)
-    
+
 # =========================================================================================================
 
 # ==== Funções da segunda rota ====
@@ -195,7 +195,7 @@ def CheckAndGo(area):
             controle=0
         if (controle == 0):
             break
-        
+
         if ((scanA.get_color()=='red')or(scanE.get_color()=='red')):
             hube.status_light.on('red')
             encerra = False
@@ -215,7 +215,7 @@ def CheckAndGo(area):
         else:
             motor_pair.start_tank(20, 20)
 
-# ---------------------------------------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------------------------------------
 
 # ---- chegada nas mudas ----
 # Percorre o tapete até chegar em uma das árvores grandes.
@@ -241,9 +241,9 @@ def GoTo(area):
         Curva(76,0)
         Andar(1.65,0)
 
-# ---------------------------------------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------------------------------------
 
-# ---- Possibilidades vermelho ---- 
+# ---- Possibilidades vermelho ----
 # Após a checagem da cor da árvore como vermelha, o robô, dependendo de onde ele está,
 # realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
 def Vermelho(area):
@@ -278,7 +278,7 @@ def Vermelho(area):
         Curva(-55,0)
         Andar(3.4,0)
 
-# ---- Possibilidades amarelo ---- 
+# ---- Possibilidades amarelo ----
 # Após a checagem da cor da árvore como amarela, o robô, dependendo de onde ele está,
 # realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
 
@@ -313,8 +313,8 @@ def Amarelo(area):
         Andar(-1.8,0)
         Curva(40,0)
         Andar(4,0)
-        
-# ---- Possibilidades verde ---- 
+
+# ---- Possibilidades verde ----
 # Após a checagem da cor da árvore como verde, o robô, dependendo de onde ele está,
 # realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
 
@@ -353,7 +353,7 @@ def Verde(area):
         Curva(-40,0)
         Andar(3.9,0)
 
-# ---- Possibilidades azul ---- 
+# ---- Possibilidades azul ----
 # Após a checagem da cor da árvore como azul, o robô, dependendo de onde ele está,
 # realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
 
@@ -392,7 +392,7 @@ def Azul(area):
         Andar(2.5,0)
         Curva(40,0)
         Andar(3.9,0)
-        
+
 # =========================================================================================================
 
 # ==== Função da segunda rota ====
@@ -419,20 +419,20 @@ def MudasPequenas():
 
 # ---- Play sub-function ----
 # A função executa uma das rotas possíveis de acordo com a sub-programação que foi aberta
-def Play(num_prog)
+def Play(num_prog):
     if(num_prog==0): #Defensivos
         DefensivoE()
         Breaking()
         DefensivoD()
     elif(num_prog==1): #Mudas grandes
-        for i in range(4)
-        CheckAndGo(i+1)
-        Breaking()
+        for i in range(4):
+            CheckAndGo(i+1)
+            Breaking()
 
     elif(num_prog==2):#Mudas pequenas
         MudasPequenas()
 
-# ---------------------------------------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------------------------------------
 
 # ---- Layout ----
 # altera o que o programa exibe dependendo da sub-programação que está selecionada
@@ -444,20 +444,20 @@ def Layout(program):
         luz.set_pixel(3,1,9)
         luz.set_pixel(3,5,9)
         for y in range(5):
-        luz.set_pixel(2, (y+1),9)
-        luz.set_pixel(4,(y+1),9)
+            luz.set_pixel(2, (y+1),9)
+            luz.set_pixel(4,(y+1),9)
     elif(program==1):
         luz.set_pixel(2,2,9)
         luz.set_pixel(2,5,9)
         luz.set_pixel(4,5,9)
         for y in range(5):
-        luz.set_pixel(3, (y+1),9)
+            luz.set_pixel(3, (y+1),9)
     elif(program==1):
         luz.set_pixel(2,2,9)
         luz.set_pixel(2,5,9)
         luz.set_pixel(4,5,9)
         for y in range(5):
-        luz.set_pixel(3, (y+1),9)
+            luz.set_pixel(3, (y+1),9)
     elif(program==2):
         for y in range(3):
             for x in range(3):
@@ -465,10 +465,10 @@ def Layout(program):
         luz.set_pixel(4,2,9)
         luz.set_pixel(2,4,9)
 
-# ---------------------------------------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------------------------------------
 
 # ---- Rodando ----
-# segunda programação a ser rodada, mas é a que permite a execução em loop do código e 
+# segunda programação a ser rodada, mas é a que permite a execução em loop do código e
 # da autonomia ao usuário para realizar as decisões de sub-programação
 
 def Rodando():
@@ -477,7 +477,7 @@ def Rodando():
         controle=1
         luz.off()
         Play(program)
-    
+
     elif hube.right_button.is_pressed():
         Timer().reset()
         hube.right_button.wait_until_released():
@@ -486,15 +486,15 @@ def Rodando():
             else:
                 program+=1
     Rodando()
-# ---------------------------------------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------------------------------------
 
 # ---- Main ----
-# inicia o programa e faz um Setup inicial 
+# inicia o programa e faz um Setup inicial
 def Main():
     program = 0
     Rodando()
-    
-# ---------------------------------------------------------------------------------------------------------- 
+
+# ----------------------------------------------------------------------------------------------------------
 
 #RODANDO PROGRAMAÇÃO PRINCIPAL:
 Main()
