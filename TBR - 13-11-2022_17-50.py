@@ -412,6 +412,7 @@ def Rodando():
     Layout(program)
     if (hube.left_button.is_pressed()):
         controle=1
+        luz.off()
         Play(program)
     
     elif hube.right_button.is_pressed():
