@@ -3,17 +3,22 @@ from spike.control import wait_for_seconds, wait_until, Timer
 from math import *
 from spike.operator import *
 import hub
+
 hube=PrimeHub()
 motor_pair = MotorPair('F', 'B')
 scanA = ColorSensor('A')
 scanE = ColorSensor('E')
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# =========================================================================================================
 
-def Curva(refer,power):#
-    #Função cujo o objetivo é fazer uma curva com cálculo PID em torno do eixo da roda que estará inerte, a partir de uma referência (medida em graus) .
-    #No caso do operador decidir colocar mais ou menos potência no motor que executará o giro, a alteração poderá ser feita no segundo
-    if (hube.left_button.is_pressed()):
+# ==== CRIAÇÃO DE PIDs ====
+
+# ---- PID CURVA ----
+# Função cujo o objetivo é fazer uma curva com cálculo PID em torno do eixo da roda que estará inerte, a partir de uma referência (medida em graus) .
+# No caso do operador decidir colocar mais ou menos potência no motor que executará o giro, a alteração poderá ser feita no segundo
+
+def Curva(refer,power):
+    if (hube.left_button.is_pressed()): # Verifica se o usuário não pretende sair do programa
         controle=0
     
     timer = Timer()
@@ -23,19 +28,19 @@ def Curva(refer,power):#
     ref = refer
     soma = 0
     tpCur = ((abs(ref)*140)/9000)
-    kp = 2.3 #Define o valor do coeficiente de proporcional
-    kd = .66 #Define o valor do coeficiente de derivativa
+    kp = 2.3 # Define o valor do coeficiente de proporcional
+    kd = .66 # Define o valor do coeficiente de derivativa
     if ref>0:
-        ki = 0.00000022 #Define o valor do coeficiente de integral
+        ki = 0.00000022 # Define o valor do coeficiente de integral
     else:
-        ki = -0.00000022 #Define o valor do coeficiente de integral
+        ki = -0.00000022 # Define o valor do coeficiente de integral
     while True:
-         if(abs(error)<1 or tpCur<timer.now()   or controle==0): #Se o erro for menor que 1 ou o temporizador for maior que o tempo mínimo para realizar a curva...
-            break # o robô sai do loop
-        if (hube.left_button.is_pressed()):
+        if(abs(error)<1 or tpCur<timer.now()   or controle==0): # Se o erro for menor que 1 <ou> o temporizador for maior que o tempo mínimo para realizar a curva <ou> a váriavel de controle for igual a 0...
+            break # O robô sai do loop
+        if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
             controle=0
-        angle = hube.motion_sensor.get_yaw_angle() # atribui o angulo lido a uma variável
-        error = ref - angle #atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
+        angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
+        error = ref - angle # Atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
         P = kp * error # Realiza o cálculo de Proporcional
         soma += error
         I = ki * soma # Realiza o cálculo de Integral
@@ -49,22 +54,15 @@ def Curva(refer,power):#
             motor_pair.start_tank_at_power(0, int(PID+power)) # inicia o movimento com potência de PID
     motor_pair.stop() # e para de mover
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------
 
-def Breaking(): #Não deixa o robô sair da programa
-    if (hube.left_button.is_pressed()):
-        controle=0
-    if (controle ==1):
-        motor_pair.stop()
-        if (hube.left_button.is_pressed()):
-            controle=0
-        hube.right_button.wait_until_pressed()
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ---- PID ANDAR ----
+# Função cujo o objetivo é fazer andar reto com cálculo PID, a partir de uma referência (medida em graus).
+# O cálculo é aplicado na função de direção do robô.
 
 def Andar(condicao,ref):
 
-    if (hube.left_button.is_pressed()):
+    if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
         controle=0
     
     motorB = Motor('B')
@@ -78,15 +76,15 @@ def Andar(condicao,ref):
     ki = .00000007
     refer = ref
     lastError = 0
-    vel = (70*4)/9 #fração de 70, que será a velocidade inicial do robô até que ele atinja 70% de potência
+    vel = (70*4)/9 # Fração de 70, que será a velocidade inicial do robô até que ele atinja 70% de potência
     velComp = vel
     soma=0
     while True:
         if(((abs(condicao)*100)<((abs(motorB.get_degrees_counted()))+abs(motorF.get_degrees_counted()))/4)    or controle==0):
             break
-        if (hube.left_button.is_pressed()):
+        if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
             controle=0
-        angle = hube.motion_sensor.get_yaw_angle() # atribui o angulo lido a uma variável
+        angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
         error = ref - angle
         P = kp * error
         soma += error
@@ -113,9 +111,28 @@ def Andar(condicao,ref):
         lastError = error
     motor_pair.stop()
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# =========================================================================================================
+
+# ==== Criação de parada temporária até que algum evento aconteça ====
+
+def Breaking(): 
+    if (hube.left_button.is_pressed()):  # Verifica se o usuário não pretende sair do programa
+        controle=0
+    if (controle ==1):
+        motor_pair.stop()
+        if (hube.left_button.is_pressed()): 
+            controle=0
+        hube.right_button.wait_until_pressed() # Espera o botão ser apertado para sair da programação
+
+# =========================================================================================================
+
+# ==== Funções da primeira rota ====
+
+# ---- primeira parte ----
+# Função com o objetivo de realizar a primeira rota do tapete, onde o robô leva os defensivos 
+# até as áreas de plantio vermelha e verde e para o depósito a esquerda do tapete.
 def DefensivoE():
- #Função com o objetivo de realizar a primeira rota do tapete, onde o robô leva os defensivos até as áreas de plantio, para os depósitos e para a base.
+
     Andar(2.3,0)
     Curva(33,0)
     Curva(-33,0)
@@ -134,6 +151,12 @@ def DefensivoE():
     Andar(-4,0)
     Curva(-50,0)
     Andar(-3.9,0)
+
+# ----------------------------------------------------------------------------------------------------------    
+    
+# ---- segunda parte ----
+# Função com o objetivo de realizar a segunda rota do tapete, onde o robô leva os defensivos 
+# até as áreas de plantio amarela, verde e para o depósito a direita e para a base.
 
 def DefensivoD():
     Andar(2.5,0)
@@ -155,7 +178,14 @@ def DefensivoD():
     Andar(-4,0)
     Curva(50,0)
     Andar(-3.5,0)
-#------------------------------------------------------------------------------------------------------------------------------------
+    
+# =========================================================================================================
+
+# ==== Funções da segunda rota ====
+
+# ---- Chegada nas árvores ----
+# Percorre um caminho (definido pelo programador entre 1 e 4) que leva a uma das árvores grandes.
+# Ao terminar o caminho, o robô identifica a cor da árvore e é encaminhado para a função de nome igual a respectiva cor.
 
 def CheckAndGo(area):
     GoTo(area)
@@ -185,8 +215,10 @@ def CheckAndGo(area):
         else:
             motor_pair.start_tank(20, 20)
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------- 
 
+# ---- chegada nas mudas ----
+# Percorre o tapete até chegar em uma das árvores grandes.
 def GoTo(area):
     if(area==1):
         Curva(-70,0)
@@ -209,8 +241,11 @@ def GoTo(area):
         Curva(76,0)
         Andar(1.65,0)
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------- 
 
+# ---- Possibilidades vermelho ---- 
+# Após a checagem da cor da árvore como vermelha, o robô, dependendo de onde ele está,
+# realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
 def Vermelho(area):
     if(area==1):
         Curva(-170,0)
@@ -243,6 +278,10 @@ def Vermelho(area):
         Curva(-55,0)
         Andar(3.4,0)
 
+# ---- Possibilidades amarelo ---- 
+# Após a checagem da cor da árvore como amarela, o robô, dependendo de onde ele está,
+# realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
+
 def Amarelo(area):
     if(area==1):
         Curva(113,0)
@@ -274,6 +313,10 @@ def Amarelo(area):
         Andar(-1.8,0)
         Curva(40,0)
         Andar(4,0)
+        
+# ---- Possibilidades verde ---- 
+# Após a checagem da cor da árvore como verde, o robô, dependendo de onde ele está,
+# realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
 
 def Verde(area):
     if(area==1):
@@ -310,6 +353,10 @@ def Verde(area):
         Curva(-40,0)
         Andar(3.9,0)
 
+# ---- Possibilidades azul ---- 
+# Após a checagem da cor da árvore como azul, o robô, dependendo de onde ele está,
+# realiza uma programação que leva a árvore grande até a área da sua cor e volta pra base
+
 def Azul(area):
     if(area==1):
         Curva(-20,0)
@@ -345,7 +392,11 @@ def Azul(area):
         Andar(2.5,0)
         Curva(40,0)
         Andar(3.9,0)
-#--------------------------------------------------------------------------------------------------------------------------------------
+        
+# =========================================================================================================
+
+# ==== Função da segunda rota ====
+# Leva as mudas pequenas para as áreas da sua cor
 
 def MudasPequenas():
     Andar(3.6,0)
@@ -362,9 +413,12 @@ def MudasPequenas():
     Curva(80,0)
     Andar(2.3,0)
 
-#------------------------------------------------------------------------------------------------------------------------------------
+# =========================================================================================================
 
+# ==== Funções de layout ====
 
+# ---- Play sub-function ----
+# A função executa uma das rotas possíveis de acordo com a sub-programação que foi aberta
 def Play(num_prog)
     if(num_prog==0): #Defensivos
         DefensivoE()
@@ -378,7 +432,10 @@ def Play(num_prog)
     elif(num_prog==2):#Mudas pequenas
         MudasPequenas()
 
-#--------------
+# ---------------------------------------------------------------------------------------------------------- 
+
+# ---- Layout ----
+# altera o que o programa exibe dependendo da sub-programação que está selecionada
 
 def Layout(program):
     luz = hube.light_matrix
@@ -408,6 +465,12 @@ def Layout(program):
         luz.set_pixel(4,2,9)
         luz.set_pixel(2,4,9)
 
+# ---------------------------------------------------------------------------------------------------------- 
+
+# ---- Rodando ----
+# segunda programação a ser rodada, mas é a que permite a execução em loop do código e 
+# da autonomia ao usuário para realizar as decisões de sub-programação
+
 def Rodando():
     Layout(program)
     if (hube.left_button.is_pressed()):
@@ -423,11 +486,15 @@ def Rodando():
             else:
                 program+=1
     Rodando()
+# ---------------------------------------------------------------------------------------------------------- 
 
+# ---- Main ----
+# inicia o programa e faz um Setup inicial 
 def Main():
     program = 0
     Rodando()
-#--------------------------------------------------------------------------------------------------------------------------------
+    
+# ---------------------------------------------------------------------------------------------------------- 
 
 #RODANDO PROGRAMAÇÃO PRINCIPAL:
 Main()
