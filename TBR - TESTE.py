@@ -22,7 +22,7 @@ def Curva(refer,power):
         controle=0
 
     timer = Timer()
-    timer.reset() #reseta timer
+    timer.reset() #reseta timer 
     hube.motion_sensor.reset_yaw_angle() # Reseta o angulo do giroscópio
     lastError = 0
     ref = refer
@@ -30,7 +30,7 @@ def Curva(refer,power):
     tpCur = ((abs(ref)*140)/9000)
     kp = 2.3 # Define o valor do coeficiente de proporcional
     kd = .66 # Define o valor do coeficiente de derivativa
-    if ref>0:
+    if ref>0:   
         ki = 0.00000022 # Define o valor do coeficiente de integral
     else:
         ki = -0.00000022 # Define o valor do coeficiente de integral
@@ -40,7 +40,7 @@ def Curva(refer,power):
         if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
             controle=0
         angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
-        error = ref - angle # Atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
+        error = (abs(ref) - abs(angle)) # Atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
         P = kp * error # Realiza o cálculo de Proporcional
         soma += error
         I = ki * soma # Realiza o cálculo de Integral
@@ -104,10 +104,10 @@ def Andar(condicao,ref):
             if(vel>((70*2)/6)):
                 if(0<condicao):
                     BOOL = False
-                    vel -= (9/condicao)
+                    vel -= (7/condicao)
                 else:
                     BOOL = False
-                    vel += (9/condicao)
+                    vel += (7/condicao)
         lastError = error
     motor_pair.stop()
 
