@@ -1,13 +1,13 @@
 from spike import PrimeHub, LightMatrix, Button, StatusLight, ForceSensor, MotionSensor, Speaker, ColorSensor, App, DistanceSensor, Motor, MotorPair,
 from spike.control import wait_for_seconds, wait_until, Timer
 from math import *
-from spike.operator import *
 import hub
 
 hube=PrimeHub()
 motor_pair = MotorPair('F', 'B')
 scanA = ColorSensor('A')
 scanE = ColorSensor('E')
+luz = hube.light_matrix
 
 # =========================================================================================================
 
@@ -19,26 +19,27 @@ scanE = ColorSensor('E')
 
 def Curva(refer,power):
     if (hube.left_button.is_pressed()): # Verifica se o usuário não pretende sair do programa
-        controle=0
+        controle=True
 
     timer = Timer()
-    timer.reset() #reseta timer 
+    timer.reset() #reseta timer
     hube.motion_sensor.reset_yaw_angle() # Reseta o angulo do giroscópio
     lastError = 0
     ref = refer
+    error = 2
     soma = 0
     tpCur = ((abs(ref)*140)/9000)
     kp = 2.3 # Define o valor do coeficiente de proporcional
     kd = .66 # Define o valor do coeficiente de derivativa
-    if ref>0:   
+    if ref>0:
         ki = 0.00000022 # Define o valor do coeficiente de integral
     else:
         ki = -0.00000022 # Define o valor do coeficiente de integral
     while True:
-        if(abs(error)<1 or tpCur<timer.now()or controle==0): # Se o erro for menor que 1 <ou> o temporizador for maior que o tempo mínimo para realizar a curva <ou> a váriavel de controle for igual a 0...
-            break # O robô sai do loop
+        '''if(abs(error)<1 or tpCur<timer.now() or controle): # Se o erro for menor que 1 <ou> o temporizador for maior que o tempo mínimo para realizar a curva <ou> a váriavel de controle for igual a 0...
+            break # O robô sai do loop'''
         if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
-            controle=0
+            controle=True
         angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
         error = (abs(ref) - abs(angle)) # Atribui o valor de erro a diferença entre o ref (a meta) e o angle (valor atual)
         P = kp * error # Realiza o cálculo de Proporcional
@@ -63,7 +64,7 @@ def Curva(refer,power):
 def Andar(condicao,ref):
 
     if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
-        controle=0
+        controle=True
 
     motorB = Motor('B')
     motorF = Motor('F')
@@ -80,10 +81,10 @@ def Andar(condicao,ref):
     velComp = vel
     soma=0
     while True:
-        if(((abs(condicao)*100)<((abs(motorB.get_degrees_counted()))+abs(motorF.get_degrees_counted()))/4)    or controle==0):
+        if(((abs(condicao)*100)<((abs(motorB.get_degrees_counted()))+abs(motorF.get_degrees_counted()))/4)    or controle):
             break
         if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
-            controle=0
+            controle=True
         angle = hube.motion_sensor.get_yaw_angle() # Atribui o angulo lido a uma variável
         error = ref - angle
         P = kp * error
@@ -117,11 +118,11 @@ def Andar(condicao,ref):
 
 def Breaking():
     if (hube.left_button.is_pressed()):# Verifica se o usuário não pretende sair do programa
-        controle=0
-    if (controle ==1):
+        controle=True
+    if (not controle):
         motor_pair.stop()
         if (hube.left_button.is_pressed()):
-            controle=0
+            controle=True
         hube.right_button.wait_until_pressed() # Espera o botão ser apertado para sair da programação
 
 # =========================================================================================================
@@ -192,8 +193,8 @@ def CheckAndGo(area):
     encerra = True
     while (encerra):
         if (hube.left_button.is_pressed()):
-            controle=0
-        if (controle == 0):
+            controle=True
+        if (controle):
             break
 
         if ((scanA.get_color()=='red')or(scanE.get_color()=='red')):
@@ -437,33 +438,27 @@ def Play(num_prog):
 # ---- Layout ----
 # altera o que o programa exibe dependendo da sub-programação que está selecionada
 
-def Layout(program):
-    luz = hube.light_matrix
-    luz.off()
+def Layout():
+    global program
     if(program==0):
-        luz.set_pixel(3,1,9)
-        luz.set_pixel(3,5,9)
+        hube.light_matrix.set_pixel(2,0)
+        hube.light_matrix.set_pixel(2,4)
         for y in range(5):
-            luz.set_pixel(2, (y+1),9)
-            luz.set_pixel(4,(y+1),9)
+            hube.light_matrix.set_pixel(1, (y))
+            hube.light_matrix.set_pixel(3,(y))
     elif(program==1):
-        luz.set_pixel(2,2,9)
-        luz.set_pixel(2,5,9)
-        luz.set_pixel(4,5,9)
+        
+        hube.light_matrix.set_pixel(1,1)
+        hube.light_matrix.set_pixel(1,4)
+        hube.light_matrix.set_pixel(3,4)
         for y in range(5):
-            luz.set_pixel(3, (y+1),9)
-    elif(program==1):
-        luz.set_pixel(2,2,9)
-        luz.set_pixel(2,5,9)
-        luz.set_pixel(4,5,9)
-        for y in range(5):
-            luz.set_pixel(3, (y+1),9)
+            hube.light_matrix.set_pixel(2, (y))
     elif(program==2):
         for y in range(3):
             for x in range(3):
-                luz.set_pixel((x+2),((y*2)+1),9)
-        luz.set_pixel(4,2,9)
-        luz.set_pixel(2,4,9)
+                luz.set_pixel((x+1),(y*2))
+        luz.set_pixel(3,1)
+        luz.set_pixel(1,3)
 
 # ----------------------------------------------------------------------------------------------------------
 
@@ -472,29 +467,37 @@ def Layout(program):
 # da autonomia ao usuário para realizar as decisões de sub-programação
 
 def Rodando():
-    Layout(program)
+    global program
+
+    Layout()
+
     if (hube.left_button.is_pressed()):
-        controle=1
+        controle=False
         luz.off()
         Play(program)
 
-    elif hube.right_button.is_pressed():
-        Timer().reset()
-        hube.right_button.wait_until_released():
-            if (Timer().now()>1):
-                program-=1
-            else:
-                program+=1
-    Rodando()
+    elif (hube.right_button.is_pressed()):
+        timer=Timer()
+        hube.right_button.wait_until_released()
+        tempoNow=timer.now()
+        print(tempoNow)
+        if (tempoNow>0):
+            program-=1
+            luz.off()
+        else:
+            program+=1
+            luz.off()
+    
 # ----------------------------------------------------------------------------------------------------------
 
 # ---- Main ----
 # inicia o programa e faz um Setup inicial
 def Main():
-    program = 0
-    Rodando()
-
+    
+    while True:
+        Rodando()
 # ----------------------------------------------------------------------------------------------------------
 
 #RODANDO PROGRAMAÇÃO PRINCIPAL:
+program = 0
 Main()
